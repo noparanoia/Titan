@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-long_positions = 0
+long_positions = 5
 
 
 class MarketSimulator(Market):

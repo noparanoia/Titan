@@ -152,5 +152,3 @@ class BaseStrategy:
         print(str("Strategy " + str(self.strategy_id) + ": " + msg))
         logger.info(msg)
         self.ui_messages.put(msg)
-
-

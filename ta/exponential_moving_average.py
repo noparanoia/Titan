@@ -14,4 +14,3 @@ class ExponentialMovingAverage(BaseIndicator):
             data_window = dataset[-self.periods:]               # take slice of correct number of candles
             data = list(c[4] for c in data_window)              # take list of close values from candles
             self.value = round(ema(data, self.periods)[-1], 6)  # update current value
-

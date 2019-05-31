@@ -15,6 +15,3 @@ def historical_ta_plot(historical_status):
 
 
 historical_ta_plot(True)
-
-
-

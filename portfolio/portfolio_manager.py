@@ -29,7 +29,7 @@ def get_profit_for_pair(exchange, pair):
     """The buys are always the even rows and the sells are the odd rows (buy always before sell starting from zero)"""
     profit = 0
     counter = 0
-    s = select([database.TradingPositions]).where(and_(database.TradingPositions.c.Exchange == exchange, database.TradingPositions.c.Pair == pair))
+    s = select([database.TradingOrders]).where(and_(database.TradingOrders.c.Exchange == exchange, database.TradingOrders.c.Pair == pair))
     result = conn.execute(s)
 
     for row in result:
@@ -43,14 +43,14 @@ def get_profit_for_pair(exchange, pair):
 
 
 def get_number_of_trades(exchange, pair):
-    s = select([func.count()]).where(and_(database.TradingPositions.c.Exchange == exchange, database.TradingPositions.c.Pair == pair)).select_from(database.TradingPositions)
+    s = select([func.count()]).where(and_(database.TradingOrders.c.Exchange == exchange, database.TradingOrders.c.Pair == pair)).select_from(database.TradingOrders)
     result = conn.execute(s)
     return int(result)
 
 
 def get_trades_for_pair_as_df(exchange, pair):
     """Returns all trades for given exchange pair over the course of trading in a dataframe"""
-    s = select([database.TradingPositions]).where(and_(database.TradingPositions.c.Exchange == exchange, database.TradingPositions.c.Pair == pair))
+    s = select([database.TradingOrders]).where(and_(database.TradingOrders.c.Exchange == exchange, database.TradingOrders.c.Pair == pair))
     result = conn.execute(s)
     df = pd.DataFrame(result.fetchall())
     df.columns = result.keys()
