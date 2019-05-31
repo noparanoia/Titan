@@ -9,6 +9,7 @@ import logging
 strategies = []
 logger = logging.getLogger(__name__)
 
+
 class BaseStrategy:
     """An abstract class that implements the backbone functionality of a strategy
 
@@ -29,6 +30,7 @@ class BaseStrategy:
          - simulated_quote_balance - the starting balance of the simulation
      A strategy inheriting from this class is an algorithm running on a specific exchange on a single trading pair
      """
+
     def __init__(self, interval, exchange, base_currency, quote_currency, is_simulated, simulated_quote_balance=0):
         self.market = None
         self.__thread = Thread(target=self.__run)
@@ -39,16 +41,19 @@ class BaseStrategy:
         self.is_simulated = is_simulated
         self.name = None
         if self.is_simulated:
-            self.market = market_simulator.MarketSimulator(exchange, base_currency, quote_currency, simulated_quote_balance, self)
+            self.market = market_simulator.MarketSimulator(
+                exchange, base_currency, quote_currency, simulated_quote_balance, self)
         else:
-            self.market = market.Market(exchange, base_currency, quote_currency, self)
+            self.market = market.Market(
+                exchange, base_currency, quote_currency, self)
         strategies.append(self)
         self.strategy_id = len(strategies)
         self.ui_messages = Queue()
 
     def start(self):
         """Start thread and subscribe to candle updates"""
-        self.__jobs.put(lambda: market_watcher.subscribe(self.market.exchange.id, self.market.base_currency, self.market.quote_currency, self.interval, self.__update))
+        self.__jobs.put(lambda: market_watcher.subscribe(self.market.exchange.id,
+                                                         self.market.base_currency, self.market.quote_currency, self.interval, self.__update))
         self.__thread.start()
 
     def warmup(self):
@@ -60,16 +65,18 @@ class BaseStrategy:
         """Queue simulation when market data has been synced"""
         if self.is_simulated:
             market_watcher.subscribe_historical(self.market.exchange.id, self.market.base_currency,
-                                            self.market.quote_currency, self.interval, self.__run_simulation)
+                                                self.market.quote_currency, self.interval, self.__run_simulation)
 
     def __warmup(self, periods=None):
         """Update TA indicators on specified number of historical periods"""
         def warmup(periods):
             self.print_message("Warming up strategy")
             if periods is None:
-                historical_data = self.market.get_historical_candles(self.interval)
+                historical_data = self.market.get_historical_candles(
+                    self.interval)
             else:
-                historical_data = self.market.get_historical_candles(self.interval, periods)
+                historical_data = self.market.get_historical_candles(
+                    self.interval, periods)
             for candle in historical_data:
                 self.market.update(self.interval, candle)
         self.__jobs.put(warmup(periods))
@@ -79,7 +86,8 @@ class BaseStrategy:
         def run_simulation(candle_set):
             self.print_message("Simulating strategy for market " + self.market.exchange.id + " " + self.market.analysis_pair)
             if candle_set is None:
-                candle_set = self.market.get_historical_candles(self.interval, 1000)
+                candle_set = self.market.get_historical_candles(
+                    self.interval, 1000)
             self.simulating = True
             for entry in candle_set:
                 self.__update(candle=entry)
@@ -128,10 +136,10 @@ class BaseStrategy:
             """LIVE long position"""
             self.print_message("Going long on " + self.market.analysis_pair)
             self.positions.append(position.open_long_position(self.market, order_quantity,
-                                                          self.market.get_best_ask(),
-                                                          fixed_stoploss_percent,
-                                                          trailing_stoploss_percent,
-                                                          profit_target_percent))
+                                                              self.market.get_best_ask(),
+                                                              fixed_stoploss_percent,
+                                                              trailing_stoploss_percent,
+                                                              profit_target_percent))
 
     def __run(self):
         """Start the strategy thread waiting for commands"""
@@ -145,7 +153,6 @@ class BaseStrategy:
                 except Exception as e:
                     print(e)
                     logger.error(job.__name__ + " threw error:\n" + str(e))
-
 
     def print_message(self, msg):
         """Add to a queue of messages that can be consumed by the UI"""
